@@ -8,7 +8,7 @@ export const generateToken = (res: Response, userId: number): string => {
     throw new Error("JWT_SECRET_KEY is not defined");
   }
 
-  const token = jwt.sign({ userId }, secret);
+  const token = jwt.sign({ id: userId }, secret);
 
   setJWTCookie(res, "authToken", token);
 

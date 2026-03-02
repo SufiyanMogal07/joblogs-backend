@@ -1,13 +1,19 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
+import { prisma } from "../db/dbConfig";
+import { AuthRequest } from "../types/auth.types";
 
-export const authMiddleware = (req: Request, res: Response, next: any) => {
-  const authCookie = req?.cookies?.authToken;
+export const authMiddleware = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  const token = req.cookies?.authToken;
 
-  if (!authCookie) {
+  if (!token) {
     return res.status(400).json({
       success: false,
-      message: "Authorization jwt cookie missing!",
+      message: "Authorization token missing!",
     });
   }
 
@@ -18,18 +24,29 @@ export const authMiddleware = (req: Request, res: Response, next: any) => {
       throw new Error("JWT_SECRET_KEY is not defined");
     }
 
-    const userId = jwt.verify(authCookie, secretKey);
+    const decoded = jwt.verify(token, secretKey) as {id: number};
 
-    if (userId) {
-      next();
-    } else {
-      process.exit(1);
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.id },
+    });
+
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized",
+      });
     }
+
+    req.user = {
+      id: user.id,
+      email: user.email
+    };
+    next();
+
   } catch (err) {
-    console.error("Token parsing failed", err);
-    return res.status(500).json({
+    return res.status(401).json({
       success: false,
-      message: "Something went wrong",
+      message: "Invalid or expire token",
     });
   }
 };
