@@ -45,7 +45,7 @@ model Jobs {
   status      JobStatus @default(draft)
   source      JobSource
   priority    Boolean @default(false)
-  Notes       String?
+  notes       String?
   appliedAt   DateTime?
 
   user User @relation(fields: [userId], references: [id])
