@@ -2,29 +2,17 @@ import { prisma } from "../db/dbConfig";
 import { Request, Response } from "express";
 import bcrypt from "bcrypt";
 import { generateToken } from "../utils/jwt/jwt";
-
-interface LoginBody {
-  email: string;
-  password: string;
-}
-
-interface RegisterBody extends LoginBody {
-  name: string;
-}
+import {
+  loginInputSchema,
+  registerInputSchema,
+} from "../validators/authValidator";
 
 export const registerUser = async (
-  req: Request<{}, {}, RegisterBody>,
+  req: Request<{}, {}, registerInputSchema>,
   res: Response,
 ) => {
   try {
     const { name, email, password } = req.body;
-
-    if (!name || !email || !password) {
-      return res.status(400).json({
-        success: false,
-        message: "Name, email and password all field's required!",
-      });
-    }
 
     const isUserExist = await prisma.user.findUnique({
       where: { email },
@@ -61,7 +49,7 @@ export const registerUser = async (
       authToken: token,
     });
   } catch (err) {
-    console.error("Something went wrong while registering user!", err);
+    console.error("Internal Error:", err);
     res.status(500).json({
       success: false,
       message: "Internal Server Error!",
@@ -70,17 +58,10 @@ export const registerUser = async (
 };
 
 export const loginUser = async (
-  req: Request<{}, {}, LoginBody>,
+  req: Request<{}, {}, loginInputSchema>,
   res: Response,
 ) => {
   const { email, password } = req.body;
-
-  if (!email || !password) {
-    return res.status(400).json({
-      success: false,
-      message: "Email and password are missing!",
-    });
-  }
 
   const existingUser = await prisma.user.findUnique({
     where: { email },
