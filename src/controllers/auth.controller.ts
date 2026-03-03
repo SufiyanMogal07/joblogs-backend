@@ -4,15 +4,26 @@ import bcrypt from "bcrypt";
 import { generateToken } from "../utils/jwt/jwt";
 import {
   loginInputSchema,
+  loginSchema,
   registerInputSchema,
+  registerSchema,
 } from "../validators/authValidator";
 
 export const registerUser = async (
-  req: Request<{}, {}, registerInputSchema>,
+  req: Request,
   res: Response,
 ) => {
   try {
-    const { name, email, password } = req.body;
+    const result = registerSchema.safeParse(req.body);
+
+    if (!result.success) {
+      return res.status(400).json({
+        message: "Check your inputs",
+        errors: result.error.flatten().fieldErrors,
+      });
+    }
+
+    const { name, email, password } = result.data;
 
     const isUserExist = await prisma.user.findUnique({
       where: { email },
@@ -61,7 +72,16 @@ export const loginUser = async (
   req: Request<{}, {}, loginInputSchema>,
   res: Response,
 ) => {
-  const { email, password } = req.body;
+  const result = loginSchema.safeParse(req.body);
+
+  if (!result.success) {
+    return res.status(400).json({
+      message: "Check your inputs",
+      errors: result.error.flatten().fieldErrors,
+    });
+  }
+
+  const { email, password } = result.data;
 
   const existingUser = await prisma.user.findUnique({
     where: { email },

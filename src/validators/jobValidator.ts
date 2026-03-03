@@ -6,9 +6,9 @@ export const JobSchema = z.object({
     position: z.string().min(3,"Job position is required!"),
     status: z.enum(JobStatus).default(JobStatus.draft),
     source: z.enum(JobSource),
-    prioirty: z.boolean().default(false),
+    priority : z.boolean().default(false),
     notes: z.string().trim().optional(),
     appliedAt: z.coerce.date().optional().nullable()
-});
+})
 
 export type JobInputSchema = z.infer<typeof JobSchema>
