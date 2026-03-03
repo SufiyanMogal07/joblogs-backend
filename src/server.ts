@@ -3,6 +3,7 @@ import express from "express";
 import { connectDB } from "./db/dbConfig";
 import authRoutes from "./routers/auth.routes";
 import testRoutes from "./routers/test.routes";
+import jobRoutes from "./routers/auth.routes";
 import cookieParser from "cookie-parser";
 
 const app = express();
@@ -15,8 +16,8 @@ connectDB();
 
 const prefixApi = "/api";
 app.use(`${prefixApi}/auth`,authRoutes);
-
 app.use(`${prefixApi}/test`, testRoutes);
+app.use(`${prefixApi}/job`, jobRoutes);
 
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
