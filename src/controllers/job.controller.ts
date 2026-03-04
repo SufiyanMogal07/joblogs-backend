@@ -1,6 +1,6 @@
 import { AuthRequest } from "../types/auth.types";
 import { Response } from "express";
-import { JobSchema } from "../validators/jobValidator";
+import { JobSchema, JobUpdateSchema } from "../validators/jobValidator";
 import { prisma } from "../db/dbConfig";
 
 // Get All Jobs
@@ -127,7 +127,60 @@ export const createJob = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// Update Job - wip
+// Update Job
+export const updateJob = async (req: AuthRequest, res: Response) => {
+  const jobId = Number(req.params.id);
+
+  if (!jobId) {
+    return res.status(400).json({
+      success: false,
+      message: "JobId is not valid",
+    });
+  }
+  const userId = req.user?.id;
+
+ if (!userId) {
+    return res.status(401).json({
+      success: false,
+      message: "User not authenticated",
+    });
+  }
+
+  const result = JobUpdateSchema.safeParse(req.body);
+
+  if (!result.success) {
+    return res.status(400).json({
+      message: "Check your inputs",
+      errors: result.error.flatten().fieldErrors,
+    });
+  }
+
+  try {
+    const updatedInfo = await prisma.jobs.updateMany({
+      where: {id: jobId,userId},
+      data: result.data
+    })
+
+    if(updatedInfo.count===0) {
+      return res.status(404).json({
+        success: false,
+        message: "Job not found or not authorized"
+      })
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Job updated successfully"
+    })
+
+  } catch (error) {
+    console.error("Something went wrong", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+};
 
 // Delete Job By Id
 export const deleteJob = async (req: AuthRequest, res: Response) => {
