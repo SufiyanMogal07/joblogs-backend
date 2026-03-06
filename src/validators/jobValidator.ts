@@ -26,7 +26,7 @@ export const JobSchema = JobBaseObject
   },
 );
 
-export const JobUpdateSchema = JobSchema.partial();
+export const JobUpdateSchema = JobBaseObject.partial();
 
 export type JobInputSchema = z.infer<typeof JobSchema>;
 export type JobUpdateInputSchema = z.infer<typeof JobUpdateSchema>;
