@@ -11,22 +11,18 @@ const JobBaseObject = z.object({
   appliedAt: z.coerce.date().optional().nullable(),
 });
 
-export const JobSchema = JobBaseObject
-.refine(
-  (data) => {
-    // Return true to pass and false to fail
-    if (data.status !== JobStatus.draft) {
-      return !!data.appliedAt;
-    }
-    return true;
-  },
-  {
-    message: "Date is required unless the job is a draft",
-    path: ["appliedAt"],
-  },
-);
+export const JobSchema = JobBaseObject.superRefine((data, ctx) => {
+  if(data.status)
+  if (data.status !== JobStatus.draft && !data.appliedAt) {
+    ctx.addIssue({
+      code: "custom",
+      message: "Applied Date is required when the job status is not draft",
+      path: ["appliedAt"],
+    });
+  }
+});
 
-export const JobUpdateSchema = JobBaseObject.partial();
+export const JobUpdateSchema = JobBaseObject.extend({id: z.number()});
 
-export type JobInputSchema = z.infer<typeof JobSchema>;
-export type JobUpdateInputSchema = z.infer<typeof JobUpdateSchema>;
+export type JobCreateInput = z.infer<typeof JobSchema>;
+export type JobUpdateInput= z.infer<typeof JobUpdateSchema>;
