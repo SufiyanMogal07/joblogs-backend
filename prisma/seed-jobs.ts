@@ -22,14 +22,14 @@ const jobs = [
   { "companyName": "NVIDIA", "position": "CUDA Developer", "status": "interviewing", "source": "linkedin", "priority": true, "notes": "Deep learning focus.", "appliedAt": "2026-02-27T10:00:00Z" },
   { "companyName": "Discord", "position": "Infrastructure Lead", "status": "draft", "source": "indeed", "priority": true, "notes": "Drafting cover letter.", "appliedAt": null }
 ];
-const userId = 7;
+const userId = 11;
 
 const main = async () => {
     try {
         const jobsWithUser = jobs.map((job) => ({
             ...job,
             userId: userId
-        }))
+        })) as any;
 
         await prisma.jobs.createMany({
             data: jobsWithUser,
@@ -39,3 +39,5 @@ const main = async () => {
 
     }
 };
+
+main();
