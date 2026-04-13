@@ -21,6 +21,9 @@ export const getAllJobs = async (req: AuthRequest, res: Response) => {
   try {
     const jobs = await prisma.jobs.findMany({
       where: { userId },
+      orderBy: {
+        priority: "desc"
+      },
       omit: {userId: true}
     });
 

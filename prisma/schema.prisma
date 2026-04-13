@@ -42,11 +42,11 @@ model Jobs {
   userId      Int
   companyName String
   position    String
+  // companyUrl  String?
   status      JobStatus @default(draft)
   source      JobSource
-  priority    Boolean @default(false)
+  priority    Boolean   @default(false)
   notes       String?
   appliedAt   DateTime?
-
-  user User @relation(fields: [userId], references: [id])
+  user        User      @relation(fields: [userId], references: [id])
 }

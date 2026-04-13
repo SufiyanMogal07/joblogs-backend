@@ -118,3 +118,7 @@ export const loginUser = async (
     token,
   });
 };
+
+export const logOutUser = async () => {
+  
+}

@@ -11,14 +11,15 @@ router.use(authMiddleware); // Auth Middleware to check user is authenticated or
 router.get("/", getAllJobs);
 
 // Get -> /api/jobs/:id - Get One Job By Id
-router.get("/:id", getJobById)
+router.get("/:id", getJobById);
 
 // POST -> /api/jobs - Create Jobs
 router.post("/",createJob);
 
 // PATCH -> /api/jobs
-router.patch("/:id",updateJob)
+router.patch("/:id",updateJob);
 
 // DELETE -> /api/jobs/:id - Delete Job By Id
-router.delete("/:id", deleteJob)
+router.delete("/:id", deleteJob);
+
 export default router;
