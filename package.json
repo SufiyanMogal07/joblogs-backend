@@ -3,7 +3,7 @@
     "version": "1.0.0",
     "main": "index.js",
     "scripts": {
-      "build": "pnpm install & npx prisma generate & npx tsc",
+      "build": "pnpm install && npx prisma generate && npx tsc",
       "start": "node dist/server.js",
       "dev": "nodemon ./src/server.ts",
       "seed-jobs": "ts-node ./prisma/seed-jobs.ts",
