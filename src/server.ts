@@ -10,7 +10,7 @@ import cors from "cors";
 const app = express();
 app.use(
   cors({
-    origin: "https://joblogs-frontend.vercel.app/",
+    origin: "https://joblogs-frontend.vercel.app",
     credentials: true,
   }),
 );
