@@ -25,10 +25,10 @@ export const setJWTCookie = (
 
   res.cookie(cookieName, token, {
     domain: isProduction ? domain : undefined,
-    secure: isProduction,
+    secure: true,
     httpOnly: true,
     maxAge: 7 * 24 * 60 * 60 * 1000,
-    sameSite: isProduction ? "none" : "lax",
+    sameSite: "none",
     path: "/",
   });
 };
