@@ -20,12 +20,15 @@ export const setJWTCookie = (
   cookieName: string,
   token: string,
 ): void => {
+  const isProduction = process.env.NODE_ENV === "production";
+  const domain = process.env.COOKIE_DOMAIN;
+
   res.cookie(cookieName, token, {
+    domain: isProduction ? domain : undefined,
+    secure: isProduction,
     httpOnly: true,
-    secure: true,
-    sameSite: "none",
-    partitioned: true,
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    path: "/"
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+    sameSite: isProduction ? "none" : "lax",
+    path: "/",
   });
 };
