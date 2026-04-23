@@ -4,6 +4,7 @@ import { connectDB, prisma } from "./db/dbConfig";
 import authRoutes from "./routers/auth.routes";
 import testRoutes from "./routers/test.routes";
 import jobRoutes from "./routers/job.routes";
+import userRoutes from "./routers/user.routes";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 
@@ -29,6 +30,8 @@ const prefixApi = "/api";
 app.use(`${prefixApi}/auth`, authRoutes);
 app.use(`${prefixApi}/test`, testRoutes);
 app.use(`${prefixApi}/jobs`, jobRoutes);
+app.use(`${prefixApi}/user`, userRoutes);
+
 
 app.get("/keep-alive", async (req, res) => {
   try {
