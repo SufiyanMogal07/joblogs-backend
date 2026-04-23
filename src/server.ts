@@ -33,10 +33,9 @@ app.use(`${prefixApi}/jobs`, jobRoutes);
 app.use(`${prefixApi}/user`, userRoutes);
 
 
-app.get("/keep-alive", async (req, res) => {
+app.get("/health", async (req, res) => {
   try {
     await prisma.$queryRaw`SELECT 1`;
-    console.log("Keep-alive successful");
     res.status(200).send("I am awake!");
   } catch (error) {
     res.status(500).send("DB error");
