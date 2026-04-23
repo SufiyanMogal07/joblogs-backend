@@ -8,11 +8,9 @@ import {
   registerInputSchema,
   registerSchema,
 } from "../validators/authValidator";
+import { AuthRequest } from "../types/auth.types";
 
-export const registerUser = async (
-  req: Request,
-  res: Response,
-) => {
+export const registerUser = async (req: Request, res: Response) => {
   try {
     const result = registerSchema.safeParse(req.body);
 
@@ -87,8 +85,6 @@ export const loginUser = async (
     where: { email },
   });
 
-  console.log(existingUser);
-
   if (!existingUser) {
     return res.status(404).json({
       success: false,
@@ -119,6 +115,43 @@ export const loginUser = async (
   });
 };
 
-export const logOutUser = async () => {
-  
-}
+export const logOutUser = async (req: AuthRequest, res: Response) => {
+  const userId = req.user?.id;
+
+  if (!userId) {
+    return res.status(401).json({
+      success: false,
+      message: "User not authenticated",
+    });
+  }
+
+  try {
+    let userExist = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+    if (!userExist) {
+      return res.status(404).json({
+        success: false,
+        message: "User not exist",
+      });
+    }
+
+    return res
+      .status(200)
+      .clearCookie("authToken", {
+        httpOnly: true,
+        secure: true,
+        sameSite: "strict",
+      })
+      .json({
+        success: true,
+        message: "Logged out successfully",
+      });
+  } catch (err) {
+    console.error("Logout Error:", err);
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error!",
+    });
+  }
+};

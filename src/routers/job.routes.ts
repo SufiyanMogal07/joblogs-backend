@@ -1,5 +1,5 @@
 import express from "express";
-import { createJob, getAllJobs,getJobById, deleteJob, updateJob } from "../controllers/job.controller";
+import { createJob, getAllJobs,getJobById, deleteJob, updateJob, searchJob } from "../controllers/job.controller";
 import { authMiddleware } from "../middleware/auth.middleware";
 
 const router = express.Router();
@@ -9,6 +9,8 @@ router.use(authMiddleware); // Auth Middleware to check user is authenticated or
 
 // Get -> /api/jobs - Get All Jobs related to user
 router.get("/", getAllJobs);
+
+router.get("/search",searchJob);
 
 // Get -> /api/jobs/:id - Get One Job By Id
 router.get("/:id", getJobById);
