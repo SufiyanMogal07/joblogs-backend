@@ -32,8 +32,7 @@ app.use(`${prefixApi}/test`, testRoutes);
 app.use(`${prefixApi}/jobs`, jobRoutes);
 app.use(`${prefixApi}/user`, userRoutes);
 
-
-app.get("/health", async (req, res) => {
+app.get(`${prefixApi}/health`, async (req, res) => {
   try {
     await prisma.$queryRaw`SELECT 1`;
     res.status(200).send("I am awake!");
