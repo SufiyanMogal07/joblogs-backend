@@ -27,17 +27,30 @@ const port = process.env.PORT;
 connectDB();
 
 const prefixApi = "/api";
+
+// App Routes
 app.use(`${prefixApi}/auth`, authRoutes);
-app.use(`${prefixApi}/test`, testRoutes);
 app.use(`${prefixApi}/jobs`, jobRoutes);
 app.use(`${prefixApi}/user`, userRoutes);
+// app.use(`${prefixApi}/test`, testRoutes);
 
-app.get(`${prefixApi}/health`, async (req, res) => {
+
+// Routes for cron - job
+
+app.get(`${prefixApi}/server-health`, async (req, res) => {
+  try {
+    res.status(200).send("Server OK");
+  } catch (error) {
+    res.status(500).send("Server error");
+  }
+});
+
+app.get(`${prefixApi}/db-health`, async (req, res) => {
   try {
     await prisma.$queryRaw`SELECT 1`;
-    res.status(200).send("I am awake!");
+    res.status(200).send("Database OK");
   } catch (error) {
-    res.status(500).send("DB error");
+    res.status(500).send("Database error");
   }
 });
 
