@@ -3,10 +3,6 @@ import { AuthRequest } from "../types/auth.types";
 import { prisma } from "../db/dbConfig";
 import { UserProfileSchema } from "../validators/userValidator";
 
-// type OptionalUserProfile = {
-//   email?: string;
-//   name?: string;
-// }
 
 export const getUserMetrics: RequestHandler = async (req, res) => {
   const authRequest = req as AuthRequest;
@@ -139,28 +135,32 @@ export const updateUserProfile: RequestHandler = async (req, res) => {
     // if both are not same then update them.
     // check if the email already exist or not inside if email is not same and email and name both are not same
 
-    // change the type of these finalData
-    let finalData: any = {};
+    // change the type of these 
+    let finalData: {name?: string,email?: string} = {};
 
-    let requestData = req.body;
+    let requestData = result.data;
 
     let checkEmailExist: boolean = false;
+
 
     if (
       requestData.email === currentProfileData.email &&
       requestData.name === currentProfileData.name
     ) {
-      return res.status(504).json({
+      return res.status(200).json({
         success: true,
-        message: "No Changes Needed!",
+        message: "Profile is already up to date. No changes needed.",
+        data: currentProfileData
       });
     }
 
+    // TO DO'S
+    // Improve this logic alot manual checking happening here..
     if (
       requestData.email === currentProfileData.email &&
       requestData.name !== currentProfileData.name
     ) {
-      finalData.name = currentProfileData.name;
+      finalData.name = requestData.name;
     }
 
     if (
@@ -187,7 +187,7 @@ export const updateUserProfile: RequestHandler = async (req, res) => {
       });
 
       if (isEmailExist) {
-        return res.status(504).json({
+        return res.status(409).json({
           success: false,
           message: "Email already exists!",
         });
@@ -198,7 +198,7 @@ export const updateUserProfile: RequestHandler = async (req, res) => {
       where: { id: userId },
       omit: { id: true, password: true },
       data: {
-        ...req.body,
+        ...finalData,
       },
     });
 
