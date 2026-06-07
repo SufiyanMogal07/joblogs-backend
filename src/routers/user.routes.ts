@@ -8,6 +8,6 @@ router.use(authMiddleware);
 
 router.get("/metrics", getUserMetrics);
 router.get("/profile", getUserProfile);
-router.post("/profile", updateUserProfile)
+router.patch("/profile", updateUserProfile)
 
 export default router;

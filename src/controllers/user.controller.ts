@@ -3,6 +3,7 @@ import { AuthRequest } from "../types/auth.types";
 import { prisma } from "../db/dbConfig";
 import { UserProfileSchema } from "../validators/userValidator";
 
+
 export const getUserMetrics: RequestHandler = async (req, res) => {
   const authRequest = req as AuthRequest;
   const userId = authRequest.user?.id;
@@ -37,7 +38,7 @@ export const getUserMetrics: RequestHandler = async (req, res) => {
       },
     };
 
-    const responseData = [...data,totalData];
+    const responseData = [...data, totalData];
 
     return res.json({
       success: true,
@@ -105,37 +106,99 @@ export const updateUserProfile: RequestHandler = async (req, res) => {
 
   const authRequest = req as AuthRequest;
   const userId = authRequest.user?.id;
+  const existingEmail = authRequest.user?.email;
 
   try {
-    if (!userId) {
+    if (!userId || !existingEmail) {
       return res.status(500).json({
         success: false,
         message: "User not authenticated",
       });
     }
 
-    const isEmailAlreadyExist = await prisma.user.findUnique({
+    const currentProfileData = await prisma.user.findUnique({
       where: {
-        email,
+        email: existingEmail,
+        id: userId,
       },
     });
 
-    if (isEmailAlreadyExist) {
-      const isCurrentEmail = authRequest.user?.email === email;
-
-      return res.status(409).json({
+    if (!currentProfileData) {
+      return res.status(404).json({
         success: false,
-        message: isCurrentEmail
-          ? "This is already your current email address."
-          : "This email address is already taken by another account.",
+        message: "User not found!",
       });
+    }
+
+    // Check both fields are same or not if same return No Changes Needeed
+    // if the email is same and name is different remove the email same vice versa step with name
+    // if both are not same then update them.
+    // check if the email already exist or not inside if email is not same and email and name both are not same
+
+    // change the type of these 
+    let finalData: {name?: string,email?: string} = {};
+
+    let requestData = result.data;
+
+    let checkEmailExist: boolean = false;
+
+
+    if (
+      requestData.email === currentProfileData.email &&
+      requestData.name === currentProfileData.name
+    ) {
+      return res.status(200).json({
+        success: true,
+        message: "Profile is already up to date. No changes needed.",
+        data: currentProfileData
+      });
+    }
+
+    // TO DO'S
+    // Improve this logic alot manual checking happening here..
+    if (
+      requestData.email === currentProfileData.email &&
+      requestData.name !== currentProfileData.name
+    ) {
+      finalData.name = requestData.name;
+    }
+
+    if (
+      requestData.name === currentProfileData.name &&
+      requestData.email !== currentProfileData.email
+    ) {
+      finalData.email = requestData.email;
+      checkEmailExist = true;
+    }
+
+    if (
+      requestData.name !== currentProfileData.name &&
+      requestData.email !== currentProfileData.email
+    ) {
+      finalData = { ...requestData };
+      checkEmailExist = true;
+    }
+
+    if (checkEmailExist) {
+      const isEmailExist = await prisma.user.findUnique({
+        where: {
+          email,
+        },
+      });
+
+      if (isEmailExist) {
+        return res.status(409).json({
+          success: false,
+          message: "Email already exists!",
+        });
+      }
     }
 
     const data = await prisma.user.update({
       where: { id: userId },
       omit: { id: true, password: true },
       data: {
-        ...req.body,
+        ...finalData,
       },
     });
 
