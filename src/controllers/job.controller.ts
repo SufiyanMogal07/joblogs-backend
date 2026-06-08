@@ -41,8 +41,8 @@ export const getAllJobs = async (req: AuthRequest, res: Response) => {
     });
 
     if (!jobs || jobs.length === 0) {
-      return res.status(404).json({
-        success: true,
+      return res.status(200).json({
+        success: false,
         message: "No jobs found!",
       });
     }
@@ -87,8 +87,8 @@ export const getJobById = async (req: AuthRequest, res: Response) => {
     });
 
     if (!job) {
-      return res.status(404).json({
-        success: true,
+      return res.status(200).json({
+        success: false,
         message: "No job found!",
       });
     }
@@ -166,7 +166,7 @@ export const updateJob = async (req: AuthRequest, res: Response) => {
   });
 
   if (!existingJob) {
-    return res.status(404).json({
+    return res.status(200).json({
       success: false,
       message: "Job not found",
     });
@@ -232,8 +232,8 @@ export const deleteJob = async (req: AuthRequest, res: Response) => {
 
     if (result.count === 0) {
       return res
-        .status(404)
-        .json({ success: false, message: "Job not found or unauthorized" });
+        .status(200)
+        .json({ success: false, message: "Job not found" });
     }
 
     return res.status(200).json({ success: true, message: "Job deleted" });
