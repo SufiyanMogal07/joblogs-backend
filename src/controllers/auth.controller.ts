@@ -139,9 +139,11 @@ export const logOutUser = async (req: AuthRequest, res: Response) => {
     return res
       .status(200)
       .clearCookie("authToken", {
+        domain: process.env.COOKIE_DOMAIN ?? "",
+        path: "/",
         httpOnly: true,
         secure: true,
-        sameSite: "strict",
+        sameSite: "none",
       })
       .json({
         success: true,
