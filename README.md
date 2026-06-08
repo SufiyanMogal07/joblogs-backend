@@ -138,11 +138,11 @@ It consumes this backend through REST APIs for authentication and job management
 - [x] Backend API
 - [x] Authentication
 - [x] Frontend–backend integration
-- [ ] Frontend improvement
+- [x] Frontend improvement
 - [ ] Resume upload (single resume, basic)
 - [ ] JD vs Resume match — basic keyword comparison
 - [ ] Testing
-- [ ] Deployment
+- [ ] Final Deployment
 
 ### Phase 2 — Resume Intelligence
 
