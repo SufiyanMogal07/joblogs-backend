@@ -42,8 +42,8 @@ export const getAllJobs = async (req: AuthRequest, res: Response) => {
 
     if (!jobs || jobs.length === 0) {
       return res.status(200).json({
-        success: false,
-        message: "No jobs found!",
+        success: true,
+        data: []
       });
     }
 
@@ -236,7 +236,7 @@ export const deleteJob = async (req: AuthRequest, res: Response) => {
         .json({ success: false, message: "Job not found" });
     }
 
-    return res.status(200).json({ success: true, message: "Job deleted" });
+    return res.status(200).json({ success: true, message: "Job deleted successfully" });
   } catch (error) {
     console.error("Something went wrong", error);
     return res.status(500).json({
