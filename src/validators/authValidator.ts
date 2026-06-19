@@ -12,7 +12,7 @@ export const registerSchema = z.object({
     .trim()
     .email("Invalid email address!")
     .max(50, "Email should not exceed 50 characters!"),
-  password: z.string().min(6).max(10),
+  password: z.string().min(6).max(15),
 });
 
 export const loginSchema = registerSchema.omit({name: true})
