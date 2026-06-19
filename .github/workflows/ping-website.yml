@@ -2,30 +2,21 @@ name: Keep-Alive Pinger
 
 on:
   schedule:
-    # Trigger 1: Every 14 minutes (For Render Server)
     - cron: '*/14 * * * *'
-    # Trigger 2: Every Wednesday at Midnight UTC (For Supabase DB)
     - cron: '0 0 * * 3'
   workflow_dispatch:
 
 jobs:
   ping:
     runs-on: ubuntu-latest
-    steps:
-      # --- RENDER SERVER KEEP-ALIVE ---
-      # Runs every 14 minutes OR when manually triggered
-      - name: Ping Render Server
-        if: github.event.schedule == '*/14 * * * *' || github.event_name == 'workflow_dispatch'
-        run: |
-          # Replace with your actual fast/lightweight endpoint
-          curl -s https://api.joblogs.sufiyanmogal.me/api/server-health > /dev/null
-          echo "Pinged the Render server endpoint!"
 
-      # --- SUPABASE DB KEEP-ALIVE ---
-      # Runs on Wednesdays OR when manually triggered
-      - name: Ping Supabase Database
-        if: github.event.schedule == '0 0 * * 3' || github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Ping Render Server
         run: |
-          # Replace with your actual endpoint that queries the DB
-          curl -s https://api.joblogs.sufiyanmogal.me/api/db-health > /dev/null
-          echo "Pinged the Supabase DB endpoint!"
+          curl -fsS https://api.joblogs.sufiyanmogal.me/api/server-health > /dev/null
+          echo "Render server pinged"
+
+      - name: Ping Supabase Database
+        run: |
+          curl -fsS https://api.joblogs.sufiyanmogal.me/api/db-health > /dev/null
+          echo "Supabase DB pinged"
