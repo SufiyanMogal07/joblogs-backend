@@ -42,7 +42,8 @@ model Jobs {
   userId      Int
   companyName String
   position    String
-  // companyUrl  String?
+  jobUrl      String
+  jobDescription String
   status      JobStatus @default(draft)
   source      JobSource
   priority    Boolean   @default(false)
