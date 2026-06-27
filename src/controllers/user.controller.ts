@@ -16,7 +16,7 @@ export const getUserMetrics: RequestHandler = async (req, res) => {
   }
 
   try {
-    let data = await prisma.jobs.groupBy({
+    let data = await prisma.job.groupBy({
       where: {
         userId,
       },

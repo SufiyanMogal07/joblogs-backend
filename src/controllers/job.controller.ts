@@ -18,7 +18,7 @@ export const getAllJobs = async (req: AuthRequest, res: Response) => {
   }
 
   try {
-    const jobs = await prisma.jobs.findMany({
+    const jobs = await prisma.job.findMany({
       where: {
         userId,
         ...(company && {
@@ -81,7 +81,7 @@ export const getJobById = async (req: AuthRequest, res: Response) => {
   }
 
   try {
-    const job = await prisma.jobs.findFirst({
+    const job = await prisma.job.findFirst({
       where: { id: jobId, userId },
       omit: { userId: true },
     });
@@ -128,7 +128,7 @@ export const createJob = async (req: AuthRequest, res: Response) => {
   }
 
   try {
-    let job = await prisma.jobs.create({
+    let job = await prisma.job.create({
       data: {
         userId,
         ...result.data,
@@ -161,7 +161,7 @@ export const updateJob = async (req: AuthRequest, res: Response) => {
     });
   }
 
-  const existingJob = await prisma.jobs.findUnique({
+  const existingJob = await prisma.job.findUnique({
     where: { id: jobId, userId },
   });
 
@@ -188,7 +188,7 @@ export const updateJob = async (req: AuthRequest, res: Response) => {
   }
 
   try {
-    await prisma.jobs.update({
+    await prisma.job.update({
       where: { id: jobId, userId },
       data: sanitizedData,
     });
@@ -226,7 +226,7 @@ export const deleteJob = async (req: AuthRequest, res: Response) => {
   }
 
   try {
-    let result = await prisma.jobs.deleteMany({
+    let result = await prisma.job.deleteMany({
       where: { id: jobId, userId },
     });
 
@@ -257,7 +257,7 @@ export const searchJob = async (req: AuthRequest, res: Response) => {
   }
 
   // match the query with job positon and companyName
-  const jobs = await prisma.jobs.findMany({
+  const jobs = await prisma.job.findMany({
     where: {
       OR: [
         { companyName: { contains: searchQuery, mode: "insensitive" } },

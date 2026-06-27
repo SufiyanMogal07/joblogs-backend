@@ -6,11 +6,11 @@ const JobBaseObject = z.object({
   position: z.string().min(3, "Job position is required!"),
   jobUrl: z
     .string()
-    .min(6, "Job URL must be at least 6 characters.")
-    .max(100, "Job URL cannot exceed 100 characters."),
+    // .min(6, "Job URL must be at least 6 characters.")
+    .max(1000, "Job URL cannot exceed 1000 characters."),
   jobDescription: z
     .string()
-    .min(50, "Job description must be at least 50 characters.")
+    // .min(50, "Job description must be at least 50 characters.")
     .max(5000, "Job description cannot exceed 5000 characters."),
   status: z.enum(JobStatus).default(JobStatus.draft),
   source: z.enum(JobSource),
