@@ -24,7 +24,7 @@ export const authMiddleware = async (
       throw new Error("JWT_SECRET_KEY is not defined");
     }
 
-    const decoded = jwt.verify(token, secretKey) as {id: number};
+    const decoded = jwt.verify(token, secretKey) as {id: string};
 
     const user = await prisma.user.findUnique({
       where: { id: decoded.id },

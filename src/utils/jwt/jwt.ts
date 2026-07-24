@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import { Response } from "express";
 
-export const generateToken = (res: Response, userId: number): string => {
+export const generateToken = (res: Response, userId: string): string => {
   const secret = process.env.JWT_SECRET_KEY;
 
   if (!secret) {
