@@ -1,30 +1,51 @@
-# JobLog - Jobs Application Tracker (Backend)
+# JobLog - Job Application Tracker (Backend)
 
-The backend of JobLog — a full-stack job application tracker.
-This repository contains only the backend built with Node.js, Express, PostgreSQL, and Prisma ORM.
+JobLog is a full-stack job application tracker that helps job seekers organize applications, track interview progress, and manage their job search in one place.
 
----
-
-[Live Demo](https://joblogs.sufiyanmogal.me/)
+This repository contains the backend built with **Node.js**, **Express**, **TypeScript**, **PostgreSQL**, and **Prisma ORM**. The frontend is maintained in a separate repository.
 
 ---
 
-## Problem It Solves
+## Live Demo
 
-During my own job search, I had no way to track how many jobs I had applied to, which companies hadn't responded, or whether my resume was actually working. JobLog is a personal digital diary for your job search — so you always know where you stand and what to improve.
+🌐 https://joblogs.sufiyanmogal.me/
+
+---
+
+## Overview
+
+The backend provides the REST APIs that power JobLog, including authentication, job management, search, user metrics, and data persistence.
 
 ---
 
 ## Features
 
-- JWT Authentication
-- REST APIs for job management
-- Add, edit, and delete job applications
-- Global Search by company name or position
-- Mark jobs as favourite
-- Notes for each job
-- PostgreSQL with Prisma ORM
-- Fully typed with TypeScript
+### Authentication
+
+- JWT authentication
+- Protected API routes
+
+### Job APIs
+
+- Create, update, and delete job applications
+- Search applications
+- Manage favourites
+- Store application notes
+- Track application status
+
+### Data Layer
+
+- PostgreSQL
+- Prisma ORM
+- Database migrations
+
+### Backend Architecture
+
+- Controller-Service pattern
+- Request validation
+- Centralized error handling
+- Typed API responses
+- TypeScript throughout the project
 
 ---
 
@@ -33,145 +54,124 @@ During my own job search, I had no way to track how many jobs I had applied to, 
 ### Backend
 
 - Node.js
-- Express
+- Express.js
+- TypeScript
 - PostgreSQL
 - Prisma ORM
 - JWT Authentication
 
-### Frontend (separate repository)
+### Frontend
 
-- Next.js (App Router)
+- Next.js
+- React
 - TypeScript
-- React Hook Form
-- Zustand
-- Tailwind CSS
+
+### Deployment
+
+- Render
+- Vercel
 
 ---
 
-## Getting Started
+## Architecture
 
-1. Clone the repository
-
-```bash
-   git clone https://github.com/SufiyanMogal07/joblogs-backend.git
+```text
+Next.js Frontend
+       │
+   REST API
+       │
+ Express.js Backend
+       │
+   Prisma ORM
+       │
+  PostgreSQL
 ```
-
-2. Ensure you have Node.js 20+ installed
-
-   Download from [nodejs.org](https://nodejs.org/) or use a version manager like `nvm`:
-
-```bash
-   nvm install 20
-   nvm use 20
-```
-
-3. Install pnpm package from npm
-
-```bash
-   npm install -g pnpm
-```
-
-4. Install dependencies
-
-```bash
-   pnpm install
-```
-
-5. Set up environment variables
-
-```bash
-   cp .env.example .env
-```
-
-6. Run Prisma migrations
-
-```bash
-   npx prisma migrate dev
-```
-
-7. Start the development server
-
-```bash
-   pnpm run dev
-```
-
-8. API runs on [http://localhost:5000/api](http://localhost:5000/api).
 
 ---
 
 ## Project Structure
 
-- `src/server.ts` – Express app entry point
+```text
+src/
+├── controllers/
+├── middleware/
+├── routers/
+├── validators/
+├── services/
+├── db/
+├── utils/
+└── types/
 
-- `src/controllers/` – Request handlers for auth, jobs, and users
-
-- `src/routers/` – API route definitions
-
-- `src/middleware/` – Auth and request middleware
-
-- `src/validators/` – Request validation schemas
-
-- `src/utils/` – Shared utilities (JWT helpers, etc.)
-
-- `src/types/` – Shared TypeScript types and interfaces
-
-- `src/db/` – Database configuration
-
-- `prisma/` – Prisma schema, migrations, and seed files
-
----
-
-## Frontend
-
-The frontend is available as a separate Next.js application with TypeScript and Tailwind CSS.
-It consumes this backend through REST APIs for authentication and job management.
-
-### [Frontend Repository](https://github.com/SufiyanMogal07/joblogs-frontend)
+prisma/
+├── schema.prisma
+├── migrations/
+└── seed.ts
+```
 
 ---
 
-## Roadmap
+## Getting Started
 
-### Phase 1 — Foundation
+Clone the repository
 
-- [x] Frontend UI
-- [x] Backend API
-- [x] Authentication
-- [x] Frontend–backend integration
-- [x] Frontend improvement
-- [ ] Resume upload (single resume, basic)
-- [ ] JD vs Resume match — basic keyword comparison
-- [ ] Testing
-- [ ] Final Deployment
+```bash
+git clone https://github.com/SufiyanMogal07/joblogs-backend.git
+```
 
-### Phase 2 — Resume Intelligence
+Install dependencies
 
-- [ ] Multiple resume versions (up to 4, role-based labels)
-- [ ] Resume linked to each job application
-- [ ] Advanced JD vs Resume analyzer (match score + missing keywords + suggestions)
-- [ ] Auto resume suggestion when adding a new job
-- [ ] Resume performance score (which resume gets most interviews/offers)
-- [ ] Resume update suggestions based on JD keywords
-- [ ] Auto-ghosted detection (no response after 30 days)
-- [ ] Enhanced interview notes per job
+```bash
+pnpm install
+```
 
-### Phase 3 — Growth & Automation
+Configure environment variables
 
-- [ ] Browser extension for one-click job capture from any job board
-- [ ] Notifications and follow-up reminders
-- [ ] Resume template recommendations based on role and profile
-- [ ] AI-powered cover letter generator from JD + resume
-- [ ] Job application analytics dashboard (response rate, offer trends)
+```bash
+cp .env.example .env
+```
+
+Run database migrations
+
+```bash
+npx prisma migrate dev
+```
+
+Start the development server
+
+```bash
+pnpm dev
+```
+
+API
+
+```
+http://localhost:5000/api
+```
 
 ---
 
 ## What I Learned
 
-- Designing clean REST APIs with Express for auth and job workflows
-- Modeling relational data in PostgreSQL with Prisma schema and migrations
-- Implementing JWT-based authentication and protected routes
-- Structuring a scalable backend with controllers, routers, middleware, and validators
-- Handling validation, error responses, and edge cases consistently
-- Improving backend architecture through iteration and better project organization
+Building JobLog's backend helped me improve at:
+
+- Designing REST APIs
+- Organizing backend architecture
+- Working with Prisma and PostgreSQL
+- Implementing JWT authentication
+- Structuring controllers, middleware, and validation
+- Building maintainable TypeScript backends
 
 ---
+
+## Future Development
+
+Upcoming features and project decisions will be documented separately.
+
+- `docs/FUTURE_FEATURES.md`
+- `docs/DECISIONS.md`
+
+---
+
+## Frontend Repository
+
+https://github.com/SufiyanMogal07/joblogs-frontend
