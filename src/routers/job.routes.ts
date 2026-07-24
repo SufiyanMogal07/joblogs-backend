@@ -1,11 +1,15 @@
 import express from "express";
-import { createJob, getAllJobs,getJobById, deleteJob, updateJob, searchJob } from "../controllers/job.controller";
+import { createJob, getAllJobs,getJobById, deleteJob, updateJob, searchJob, updateJobStatus, getJobMetaData } from "../controllers/job.controller";
 import { authMiddleware } from "../middleware/auth.middleware";
 
 const router = express.Router();
 
-// Authenticated Routes
-router.use(authMiddleware); // Auth Middleware to check user is authenticated or not
+router.use(authMiddleware);
+
+//#region  //*========== Job Routes ==========
+
+// Get -> Job Meta Data - Job Source and Status
+router.get("/meta-data",getJobMetaData);
 
 // Get -> /api/jobs - Get All Jobs related to user
 router.get("/", getAllJobs);
@@ -21,7 +25,12 @@ router.post("/",createJob);
 // PATCH -> /api/jobs
 router.patch("/:id",updateJob);
 
+// PATCH -> /api/jobs/status
+router.patch("/:id/status",updateJobStatus);
+
 // DELETE -> /api/jobs/:id - Delete Job By Id
 router.delete("/:id", deleteJob);
+
+//#endregion  //*========== Job Routes ==========
 
 export default router;

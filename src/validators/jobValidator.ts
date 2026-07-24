@@ -30,7 +30,9 @@ export const JobSchema = JobBaseObject.superRefine((data, ctx) => {
     }
 });
 
-export const JobUpdateSchema = JobBaseObject.extend({ id: z.number() });
+export const JobUpdateSchema = JobBaseObject.partial().extend({
+  id: z.string().optional(),
+});
 
 export type JobCreateInput = z.infer<typeof JobSchema>;
 export type JobUpdateInput = z.infer<typeof JobUpdateSchema>;

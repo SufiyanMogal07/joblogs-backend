@@ -2,7 +2,37 @@ import { RequestHandler } from "express";
 import { AuthRequest } from "../types/auth.types";
 import { prisma } from "../db/dbConfig";
 import { UserProfileSchema } from "../validators/userValidator";
+import { JobStatus } from "../generated/prisma/enums";
 
+type MetricWithStatus = JobStatus | "total";
+
+const METRICS_ORDER: MetricWithStatus[] = [
+  "total",
+  "draft",
+  "applied",
+  "interviewing",
+  "onhold",
+  "offer",
+  "rejected",
+  "ghosted",
+];
+
+const METRICS_LABELS : Record<MetricWithStatus, string> = {
+  total: "Jobs Tracked",
+  draft: "Draft Jobs",
+  applied: "Application Sent",
+  interviewing: "Interviewing",
+  onhold: "On Hold",
+  offer: "Offer",
+  rejected: "Rejected",
+  ghosted: "Ghosted",
+} as const;
+
+interface MetricData {
+  status: MetricWithStatus;
+  label: string;
+  count: number;
+}
 
 export const getUserMetrics: RequestHandler = async (req, res) => {
   const authRequest = req as AuthRequest;
@@ -26,25 +56,26 @@ export const getUserMetrics: RequestHandler = async (req, res) => {
       },
     });
 
-    const totalApplication = data.reduce(
-      (total, value) => total + value._count.status,
-      0,
+    let totalCount = data.reduce((total, value) => total + value._count.status, 0) || 0;
+
+    const countMap: Map<MetricWithStatus, number> = new Map(
+      data.map((d) => [d.status, d._count.status]),
     );
 
-    let totalData = {
-      status: "total" as any,
-      _count: {
-        status: totalApplication || 0,
-      },
-    };
-
-    const responseData = [...data, totalData];
+    let finalData: MetricData[] = METRICS_ORDER.map((status) => {
+      return {
+        status,
+        label: METRICS_LABELS[status],
+        count: status==="total" ? totalCount : countMap.get(status) ?? 0,
+      };
+    });
 
     return res.json({
       success: true,
       message: "All Metrics Data Fetched",
-      data: responseData,
+      data: finalData,
     });
+
   } catch (error) {
     console.error("Something went wrong in user metrics", error);
     return res.status(500).json({
@@ -135,13 +166,12 @@ export const updateUserProfile: RequestHandler = async (req, res) => {
     // if both are not same then update them.
     // check if the email already exist or not inside if email is not same and email and name both are not same
 
-    // change the type of these 
-    let finalData: {name?: string,email?: string} = {};
+    // change the type of these
+    let finalData: { name?: string; email?: string } = {};
 
     let requestData = result.data;
 
     let checkEmailExist: boolean = false;
-
 
     if (
       requestData.email === currentProfileData.email &&
@@ -150,7 +180,7 @@ export const updateUserProfile: RequestHandler = async (req, res) => {
       return res.status(200).json({
         success: true,
         message: "Profile is already up to date. No changes needed.",
-        data: currentProfileData
+        data: currentProfileData,
       });
     }
 

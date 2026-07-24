@@ -1,7 +1,36 @@
 import { AuthRequest } from "../types/auth.types";
 import { Response } from "express";
-import { JobSchema, JobUpdateInput } from "../validators/jobValidator";
+import {
+  JobSchema,
+  JobUpdateInput,
+  JobUpdateSchema,
+} from "../validators/jobValidator";
 import { prisma } from "../db/dbConfig";
+
+export const getJobMetaData = (req: AuthRequest,res: Response) => {
+  const status = [
+    "draft",
+    "applied",
+    "intervewing",
+    "onhold",
+    "offer",
+    "rejected",
+    "ghosted",
+  ];
+  const source = [
+    "linkedin",
+    "indeed",
+    "company_website",
+    "referral",
+    "cold_call",
+    "cold_email",
+    "other",
+  ];
+
+  return res.status(200).json({success: true, message: "Job Meta Data Fetched!", data: {
+    status, source
+  }})
+};
 
 // Get All Jobs
 export const getAllJobs = async (req: AuthRequest, res: Response) => {
@@ -43,7 +72,7 @@ export const getAllJobs = async (req: AuthRequest, res: Response) => {
     if (!jobs || jobs.length === 0) {
       return res.status(200).json({
         success: true,
-        data: []
+        data: [],
       });
     }
 
@@ -64,7 +93,7 @@ export const getAllJobs = async (req: AuthRequest, res: Response) => {
 // Get Job By Id
 export const getJobById = async (req: AuthRequest, res: Response) => {
   const userId = req.user?.id;
-  const jobId = Number(req.params.id);
+  const jobId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
 
   if (!jobId) {
     return res.status(400).json({
@@ -108,6 +137,7 @@ export const getJobById = async (req: AuthRequest, res: Response) => {
 };
 
 // Create Job
+// self unit testing left
 export const createJob = async (req: AuthRequest, res: Response) => {
   const result = JobSchema.safeParse(req.body);
 
@@ -128,11 +158,22 @@ export const createJob = async (req: AuthRequest, res: Response) => {
   }
 
   try {
-    let job = await prisma.job.create({
-      data: {
-        userId,
-        ...result.data,
-      },
+    const job = await prisma.$transaction(async (tx) => {
+      const createdJob = await prisma.job.create({
+        data: {
+          userId,
+          ...result.data,
+        },
+      });
+
+      await tx.jobTimeline.create({
+        data: {
+          jobId: createdJob.id,
+          toStatus: createdJob.status,
+        },
+      });
+
+      return createJob;
     });
 
     return res.status(201).json({
@@ -150,9 +191,10 @@ export const createJob = async (req: AuthRequest, res: Response) => {
 };
 
 // Update Job
+// self unit testing left
 export const updateJob = async (req: AuthRequest, res: Response) => {
-  const jobId = Number(req.params.id);
   const userId = req.user?.id;
+  const jobId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
 
   if (!jobId || !userId) {
     return res.status(400).json({
@@ -172,7 +214,7 @@ export const updateJob = async (req: AuthRequest, res: Response) => {
     });
   }
 
-  const result = JobSchema.safeParse(req.body);
+  const result = JobUpdateSchema.safeParse(req.body);
 
   if (!result.success) {
     return res.status(400).json({
@@ -181,16 +223,31 @@ export const updateJob = async (req: AuthRequest, res: Response) => {
     });
   }
 
-  const { id, ...sanitizedData } = result.data as JobUpdateInput;
+  const { id, ...sanitizedData } = result.data;
 
-  if (sanitizedData.status === "draft") {
-    sanitizedData.appliedAt = null;
-  }
+  if (sanitizedData.status === "draft") sanitizedData.appliedAt = null;
+
+  const currentStatus = sanitizedData.status;
+  const existingStatus = existingJob.status;
 
   try {
-    await prisma.job.update({
-      where: { id: jobId, userId },
-      data: sanitizedData,
+    const job = await prisma.$transaction(async (tx) => {
+      const updatedData = await prisma.job.update({
+        where: { id: jobId, userId },
+        data: sanitizedData,
+      });
+
+      if (currentStatus && currentStatus !== existingStatus) {
+        await tx.jobTimeline.create({
+          data: {
+            jobId,
+            fromStatus: existingStatus,
+            toStatus: currentStatus,
+          },
+        });
+      }
+
+      return updatedData;
     });
 
     return res.status(200).json({
@@ -206,10 +263,24 @@ export const updateJob = async (req: AuthRequest, res: Response) => {
   }
 };
 
+// Update Job Status
+// self unit testing left
+// id, status,
+export const updateJobStatus = async (req: AuthRequest, res: Response) => {
+  const userId = req.user?.id;
+  const jobId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+
+  // try {
+
+  // } catch() {
+
+  // }
+};
+
 // Delete Job By Id
 export const deleteJob = async (req: AuthRequest, res: Response) => {
   const userId = req.user?.id;
-  const jobId = Number(req.params.id);
+  const jobId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
 
   if (!jobId) {
     return res.status(400).json({
@@ -231,12 +302,12 @@ export const deleteJob = async (req: AuthRequest, res: Response) => {
     });
 
     if (result.count === 0) {
-      return res
-        .status(200)
-        .json({ success: false, message: "Job not found" });
+      return res.status(200).json({ success: false, message: "Job not found" });
     }
 
-    return res.status(200).json({ success: true, message: "Job deleted successfully" });
+    return res
+      .status(200)
+      .json({ success: true, message: "Job deleted successfully" });
   } catch (error) {
     console.error("Something went wrong", error);
     return res.status(500).json({
