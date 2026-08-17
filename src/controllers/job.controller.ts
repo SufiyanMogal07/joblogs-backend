@@ -1,43 +1,59 @@
 import { AuthRequest } from "../types/auth.types";
 import { Response } from "express";
-import {
-  JobSchema,
-  JobUpdateInput,
-  JobUpdateSchema,
-} from "../validators/jobValidator";
+import { JobSchema, JobUpdateSchema } from "../validators/jobValidator";
 import { prisma } from "../db/dbConfig";
+import {
+  FrontendSortByType,
+  JobMetaDataSource,
+  JobMetaDataStatus,
+  SortByMapping,
+  SortByType,
+} from "../helper/job/job.helper";
+import { JobSource, JobStatus } from "../generated/prisma/enums";
+import { getQueryParam } from "../utils/query.utils";
+import z from "zod";
 
-export const getJobMetaData = (req: AuthRequest,res: Response) => {
-  const status = [
-    "draft",
-    "applied",
-    "intervewing",
-    "onhold",
-    "offer",
-    "rejected",
-    "ghosted",
-  ];
-  const source = [
-    "linkedin",
-    "indeed",
-    "company_website",
-    "referral",
-    "cold_call",
-    "cold_email",
-    "other",
-  ];
+export const searchJob = async (req: AuthRequest, res: Response) => {
+  const searchQuery = req.query.q as string;
 
-  return res.status(200).json({success: true, message: "Job Meta Data Fetched!", data: {
-    status, source
-  }})
+  console.log(searchQuery);
+
+  if (typeof searchQuery !== "string" || searchQuery.length < 3) {
+    return res.status(400).json({
+      success: false,
+      message: "Empty Search Query!",
+    });
+  }
+
+  // match the query with job positon and companyName
+  const jobs = await prisma.job.findMany({
+    where: {
+      OR: [
+        { companyName: { contains: searchQuery, mode: "insensitive" } },
+        { position: { contains: searchQuery, mode: "insensitive" } },
+      ],
+    },
+    distinct: ["position", "companyName"],
+    select: {
+      position: true,
+      companyName: true,
+    },
+    take: 5,
+  });
+
+  return res.status(200).json({
+    success: true,
+    message: "Job fetched successfully!",
+    data: jobs,
+  });
 };
 
 // Get All Jobs
+// Sort By -> Newest Added (createdAt desc) => (default), Oldest Added (createdAt asc), Recently Updated (updatedAt desc), Company A–Z, Company Z–A, Priority First
+// Filter By -> Job Status, Job Source
+
 export const getAllJobs = async (req: AuthRequest, res: Response) => {
   const userId = req.user?.id;
-
-  const company = req.query?.company;
-  const position = req.query?.position;
 
   if (!userId) {
     return res.status(401).json({
@@ -46,46 +62,58 @@ export const getAllJobs = async (req: AuthRequest, res: Response) => {
     });
   }
 
+  let sortBy: SortByType = SortByType.Newest; // By default newest first
+
+  const company = getQueryParam<string>(req.query.company);
+  const position = getQueryParam<string>(req.query.position);
+
+  const status = getQueryParam(req.query?.status, z.enum(JobStatus)) as
+    | JobStatus
+    | undefined;
+
+  const source = getQueryParam(req.query?.source, z.enum(JobSource)) as
+    | JobSource
+    | undefined;
+
+  const sortByValue = req.query?.sortBy
+    ? String(req.query.sortBy as SortByType)
+    : undefined;
+
+  if (sortByValue) sortBy = sortByValue as SortByType;
+
   try {
     const jobs = await prisma.job.findMany({
       where: {
         userId,
         ...(company && {
           companyName: {
-            contains: String(company).replaceAll("-", " "),
+            contains: company.replaceAll("-", " "),
             mode: "insensitive",
           },
         }),
         ...(position && {
           position: {
-            contains: String(position).replaceAll("-", " "),
+            contains: position.replaceAll("-", " "),
             mode: "insensitive",
           },
         }),
+        ...(status && { status }),
+        ...(source && { source }),
       },
-      orderBy: {
-        priority: "desc",
-      },
+      orderBy: SortByMapping[sortBy] || {},
       omit: { userId: true },
     });
 
-    if (!jobs || jobs.length === 0) {
-      return res.status(200).json({
-        success: true,
-        data: [],
-      });
-    }
-
     return res.status(200).json({
       success: true,
-      message: "All jobs fetched successfully!",
-      data: jobs,
+      data: jobs || [],
     });
   } catch (error) {
-    console.error("Something went wrong!", error);
+    let message = "Something went wrong while fetching jobs!";
+    console.error(message, error);
     return res.status(500).json({
       success: false,
-      message: "Internal Server Error!",
+      message: message,
     });
   }
 };
@@ -115,17 +143,10 @@ export const getJobById = async (req: AuthRequest, res: Response) => {
       omit: { userId: true },
     });
 
-    if (!job) {
-      return res.status(200).json({
-        success: false,
-        message: "No job found!",
-      });
-    }
-
     return res.status(200).json({
       success: true,
       message: "Job fetched successfully!",
-      data: job,
+      data: job || [],
     });
   } catch (error) {
     console.error("Something went wrong!", error);
@@ -263,20 +284,6 @@ export const updateJob = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// Update Job Status
-// self unit testing left
-// id, status,
-export const updateJobStatus = async (req: AuthRequest, res: Response) => {
-  const userId = req.user?.id;
-  const jobId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
-
-  // try {
-
-  // } catch() {
-
-  // }
-};
-
 // Delete Job By Id
 export const deleteJob = async (req: AuthRequest, res: Response) => {
   const userId = req.user?.id;
@@ -317,35 +324,44 @@ export const deleteJob = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const searchJob = async (req: AuthRequest, res: Response) => {
-  const searchQuery = req.query.q as string;
+// self testing done
+export const getSortData = async (req: AuthRequest, res: Response) => {
+  const userId = req.user?.id;
 
-  if (typeof searchQuery !== "string" || searchQuery.length < 3) {
-    return res.status(400).json({
+  if (!userId) {
+    return res.status(401).json({
       success: false,
-      message: "Empty Search Query!",
+      message: "User not authenticated",
     });
   }
 
-  // match the query with job positon and companyName
-  const jobs = await prisma.job.findMany({
-    where: {
-      OR: [
-        { companyName: { contains: searchQuery, mode: "insensitive" } },
-        { position: { contains: searchQuery, mode: "insensitive" } },
-      ],
-    },
-    distinct: ["position", "companyName"],
-    select: {
-      position: true,
-      companyName: true,
-    },
-    take: 5,
-  });
+  let sortTypeData = FrontendSortByType;
 
   return res.status(200).json({
     success: true,
-    message: "Job fetched successfully!",
-    data: jobs,
+    data: sortTypeData,
+  });
+};
+
+// self testing done
+export const getJobMetaData = async (req: AuthRequest, res: Response) => {
+  const userId = req.user?.id;
+
+  if (!userId) {
+    return res.status(401).json({
+      success: false,
+      message: "User not authenticated",
+    });
+  }
+
+  const jobStatus = JobMetaDataStatus.options;
+  const jobSource = JobMetaDataSource.options;
+
+  return res.status(200).json({
+    success: true,
+    data: {
+      status: jobStatus,
+      source: jobSource,
+    },
   });
 };
