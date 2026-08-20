@@ -167,7 +167,7 @@ Building JobLog's backend helped me improve at:
 
 Upcoming features and project decisions will be documented separately.
 
-- `docs/FUTURE_FEATURES.md`
+- `docs/FEATURES.md`
 - `docs/DECISIONS.md`
 
 ---
