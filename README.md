@@ -33,6 +33,15 @@ The backend provides the REST APIs that power JobLog, including authentication, 
 - Store application notes
 - Track application status
 
+### Email Notifications
+
+- Send automated reminders for draft jobs not updated for 3 days
+- Notify users about applications inactive for 30 days
+- Send reminders for applications with no response for 60 days
+- Allow users to enable or disable email notifications
+- Scheduled email notifications using cron jobs
+
+
 ### Data Layer
 
 - PostgreSQL
