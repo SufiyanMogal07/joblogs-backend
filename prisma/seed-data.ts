@@ -1,5 +1,8 @@
 import { prisma } from "../src/db/dbConfig";
-const demoJobs = [
+import { Prisma } from "../src/generated/prisma/client";
+import bcrypt from "bcrypt";
+
+const demoJobs: Omit<Prisma.JobCreateManyInput, "userId">[] = [
   {
     companyName: "Google",
     position: "Software Engineer",
@@ -281,21 +284,54 @@ const demoJobs = [
     updatedAt: "2026-03-06T10:00:00Z",
   },
 ];
-const userId = "9b16ef01-63b6-4664-979e-c31fe0c839c";
 
+const demoUsers = [
+  {
+    name: "Sufiyan Mogal",
+    email: "sufiyanyaseenmogal@gmail.com",
+    emailNotification: true
+  },
+  {
+    name: "Aarav Sharma",
+    email: "aarav.demo@example.com",
+     emailNotification: true
+  },
+  {
+    name: "Zoya Khan",
+    email: "zoya.demo@example.com",
+     emailNotification: true
+  },
+];
 
 const main = async () => {
   try {
-    const jobsWithUser = demoJobs.map((value) => ({
-      ...value,
-      userId,
-    })) as any;
+    for (const userData of demoUsers) {
+      const hashedPassword = await bcrypt.hash("demo123456",10);
+      const user = await prisma.user.upsert({
+        where: {
+          email: userData.email,
+        },
+        update: {},
+        create: {
+          ...userData,
+          password: hashedPassword
+        },
+      });
 
-    await prisma.job.createMany({
-      data: jobsWithUser,
-      skipDuplicates: true,
-    });
-  } catch (error) {}
+      const jobsWithUser = demoJobs.map((job) => ({
+        ...job,
+        userId: user.id
+      }));
+
+      await prisma.job.createMany({
+        data: jobsWithUser,
+        skipDuplicates: true,
+      })
+
+    }
+  } catch (error) {
+    console.error("Something went wrong while seeding data")
+  }
 };
 
 main();

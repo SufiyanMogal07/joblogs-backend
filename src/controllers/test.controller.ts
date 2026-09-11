@@ -1,13 +1,10 @@
-import { Request, RequestHandler, Response } from "express";
+import { Response } from "express";
 import { AuthRequest } from "../types/auth.types";
 
+export const testController = async (req: AuthRequest,res: Response) => {
+   console.log("Test Route..");
 
-
-export const testController = (req: AuthRequest,res: Response) => {
-    console.log(req.user);
-
-    return res.status(200).json({
-        message: "Testing...",
-        data: req.user
-    })
+   return res.status(200).json({
+    message: "Test message"
+   })
 }

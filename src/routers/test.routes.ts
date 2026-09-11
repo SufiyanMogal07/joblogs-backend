@@ -4,6 +4,6 @@ import { testController } from "../controllers/test.controller";
 
 const router = express.Router();
 
-router.post("/",authMiddleware, testController);
+router.get("/", testController);
 
 export default router;

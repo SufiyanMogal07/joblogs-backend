@@ -1,17 +1,15 @@
 # JobLog Features
 
-## Email Notifications
+## Email Notifications - Done
 
-- Notify users about draft jobs that have not been applied to after a set period.
-- Send reminders for scheduled follow-ups.
-- Notify users when an application has been inactive for a long time.
-- Send interview reminders before scheduled interviews.
-- Allow users to enable, disable, and customize notification preferences.
+- Send reminders for draft jobs that have not been updated for 3 days.
+- Notify users when an application has been inactive for 30 days.
+- Remind users when an application has had no response for 60 days and suggest marking it as ghosted.
+- Allow users to enable or disable email notifications.
 
-## Resume Management
+## Resume Management - Thinking
 
-- Upload default resume from Profile.
-- Auto-select default resume when creating a job.
-- Allow custom resume for a specific job.
+- Upload a default resume from Profile.
+- Auto-select the default resume when creating a job.
+- Allow a custom resume for individual jobs.
 - View, replace, and delete resumes.
-

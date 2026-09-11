@@ -16,8 +16,6 @@ import z from "zod";
 export const searchJob = async (req: AuthRequest, res: Response) => {
   const searchQuery = req.query.q as string;
 
-  console.log(searchQuery);
-
   if (typeof searchQuery !== "string" || searchQuery.length < 3) {
     return res.status(400).json({
       success: false,
@@ -158,7 +156,6 @@ export const getJobById = async (req: AuthRequest, res: Response) => {
 };
 
 // Create Job
-// self unit testing left
 export const createJob = async (req: AuthRequest, res: Response) => {
   const result = JobSchema.safeParse(req.body);
 
@@ -212,7 +209,6 @@ export const createJob = async (req: AuthRequest, res: Response) => {
 };
 
 // Update Job
-// self unit testing left
 export const updateJob = async (req: AuthRequest, res: Response) => {
   const userId = req.user?.id;
   const jobId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
@@ -324,7 +320,6 @@ export const deleteJob = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// self testing done
 export const getSortData = async (req: AuthRequest, res: Response) => {
   const userId = req.user?.id;
 
@@ -343,7 +338,6 @@ export const getSortData = async (req: AuthRequest, res: Response) => {
   });
 };
 
-// self testing done
 export const getJobMetaData = async (req: AuthRequest, res: Response) => {
   const userId = req.user?.id;
 

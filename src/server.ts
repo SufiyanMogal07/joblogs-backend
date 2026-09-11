@@ -2,11 +2,15 @@ import "dotenv/config";
 import express from "express";
 import { connectDB, prisma } from "./db/dbConfig";
 import authRoutes from "./routers/auth.routes";
-import testRoutes from "./routers/test.routes";
 import jobRoutes from "./routers/job.routes";
 import userRoutes from "./routers/user.routes";
+import notificationRoutes from "./routers/notification.routes";
+import testRoutes from "./routers/test.routes";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import "./cron/draftJobReminder.cron";
+import "./cron/inActiveJobReminder.cron";
+import "./cron/ghostJobReminder.cron";
 
 const app = express();
 
@@ -29,14 +33,14 @@ connectDB();
 const prefixApi = "/api";
 
 // App Routes
+app.use(`${prefixApi}/notifications`,notificationRoutes);
 app.use(`${prefixApi}/auth`, authRoutes);
 app.use(`${prefixApi}/jobs`, jobRoutes);
 app.use(`${prefixApi}/user`, userRoutes);
+
 // app.use(`${prefixApi}/test`, testRoutes);
 
-
-// Routes for cron - job
-
+// Routes for cron job - ping endpoints
 app.get(`${prefixApi}/server-health`, async (req, res) => {
   try {
     res.status(200).send("Server OK");
