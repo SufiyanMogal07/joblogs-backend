@@ -5,12 +5,8 @@ import authRoutes from "./routers/auth.routes";
 import jobRoutes from "./routers/job.routes";
 import userRoutes from "./routers/user.routes";
 import notificationRoutes from "./routers/notification.routes";
-import testRoutes from "./routers/test.routes";
 import cookieParser from "cookie-parser";
 import cors from "cors";
-import "./cron/draftJobReminder.cron";
-import "./cron/inActiveJobReminder.cron";
-import "./cron/ghostJobReminder.cron";
 
 const app = express();
 
@@ -37,8 +33,6 @@ app.use(`${prefixApi}/notifications`,notificationRoutes);
 app.use(`${prefixApi}/auth`, authRoutes);
 app.use(`${prefixApi}/jobs`, jobRoutes);
 app.use(`${prefixApi}/user`, userRoutes);
-
-// app.use(`${prefixApi}/test`, testRoutes);
 
 // Routes for cron job - ping endpoints
 app.get(`${prefixApi}/server-health`, async (req, res) => {

@@ -1,7 +1,8 @@
-import { Response } from "express";
+import { RequestHandler, Response } from "express";
 import { AuthRequest } from "../types/auth.types";
 import { notificationSchema } from "../validators/notificationValidator";
 import { prisma } from "../db/dbConfig";
+import { processNotifications } from "../jobs/notificationJob";
 
 export const updateEmailNotification = async (
   req: AuthRequest,
@@ -42,7 +43,9 @@ export const updateEmailNotification = async (
 
     return res.status(200).json({
       success: true,
-      message:  isEnabled ? "Email notifications enabled successfully." : "Email notifications disabled successfully.",
+      message: isEnabled
+        ? "Email notifications enabled successfully."
+        : "Email notifications disabled successfully.",
       data: {
         emailNotification: user.emailNotification,
       },
@@ -54,4 +57,13 @@ export const updateEmailNotification = async (
       message: "Failed to update email notification.",
     });
   }
+};
+
+export const runNotifications: RequestHandler = async (req, res) => {
+  await processNotifications();
+
+  return res.status(200).json({
+    success: true,
+    message: "Notifications processed",
+  });
 };
