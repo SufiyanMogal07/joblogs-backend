@@ -7,9 +7,8 @@ import { authMiddleware } from "../middleware/auth.middleware";
 import { verifyCronSecret } from "../middleware/cron.secret.middleware";
 
 const router = express.Router();
-router.use(authMiddleware);
 
-router.patch("/email", updateEmailNotification);
+router.patch("/email",authMiddleware, updateEmailNotification);
 router.get("/run", verifyCronSecret, runNotifications);
 
 export default router;
