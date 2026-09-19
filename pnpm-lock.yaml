@@ -14,9 +14,6 @@ importers:
       '@prisma/client':
         specifier: ^7.4.1
         version: 7.10.0(prisma@7.10.0(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@5.9.3))(typescript@5.9.3)
-      backend:
-        specifier: 'link:'
-        version: 'link:'
       cookie-parser:
         specifier: ^1.4.7
         version: 1.4.7
